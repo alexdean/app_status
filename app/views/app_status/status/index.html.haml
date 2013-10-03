@@ -1,0 +1,16 @@
+- data = @checks.as_json
+
+%div
+  Overall Status
+  = data[:status]
+
+%div
+  %table.table
+    - data[:details].each do |key,data|
+      %tr
+        %td
+          =key
+        %td
+          =data[:status]
+        %td
+          =data[:details]
