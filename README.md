@@ -81,5 +81,3 @@ Output will look something like this:
 
 The overall status will be the worst status which is actually observed in your
 individual checks.
-
-`run_time` is in milliseconds.

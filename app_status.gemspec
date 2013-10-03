@@ -10,14 +10,13 @@ Gem::Specification.new do |s|
   s.authors     = ["Alex Dean"]
   s.email       = ["alex@crackpot.org"]
   s.homepage    = "http://github.com/alexdean/app_status"
-  s.summary     = "AppStatus is a Rails engine for monitoring your applications health."
+  s.summary     = "AppStatus is a Rails engine for exposing app data to Nagios.."
   s.description = "AppStatus provides a URL which is easily consumable by Nagios or other monitoring tools."
 
-  s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.rdoc"]
+  s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~> 3.2.13"
   s.add_dependency "haml"
   s.add_dependency "haml-rails"
-  # s.add_dependency "jquery-rails"
 end
