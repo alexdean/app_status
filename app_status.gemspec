@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.summary     = "AppStatus is a Rails engine for exposing app data to Nagios.."
   s.description = "AppStatus provides a URL which is easily consumable by Nagios or other monitoring tools."
 
-  s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
+  s.files = Dir["{app,bin,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~> 3.2.13"
