@@ -64,7 +64,7 @@ Output will look something like this:
   "status_code": 2,
   "run_time_ms": 52,
   "finished": "2013-10-03T21:28:10Z",
-  "details": {
+  "checks": {
     "some_service": {
       "status": "ok",
       "status_code": 0,
