@@ -134,4 +134,6 @@ else
   final = "#{json['status'].upcase}. No details available."
 end
 
+puts if $verbose
+
 exit_with json['status_code'], final
