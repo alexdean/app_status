@@ -16,8 +16,8 @@ describe AppStatus::StatusController do
       data = JSON.parse(response.body)
       data['status'].should eq 'ok'
       data['status_code'].should eq 0
-      data['details']['some_service']['status'].should eq 'ok'
-      data['details']['some_service']['details'].should eq 'foo'
+      data['checks']['some_service']['status'].should eq 'ok'
+      data['checks']['some_service']['details'].should eq 'foo'
     end
 
     it "should render html" do
