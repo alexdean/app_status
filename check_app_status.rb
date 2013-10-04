@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+# This is a Nagios script intended to check the JSON output from an application
+# using app_status to expose some monitoring data.
+#
+# ./check_app_status.rb for usage information.
+#
+
 require 'optparse'
 require 'net/http'
 require 'json'
