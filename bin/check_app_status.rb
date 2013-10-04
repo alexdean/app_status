@@ -115,12 +115,12 @@ if ! json['status_code']
   exit_with CRIT, "JSON response #{options[:url]} does not contain 'status_code'."
 end
 
-if json['details'].size > 0
+if json['checks'].size > 0
   data = {}
-  json['details'].each do |service, details|
-    key = details['status_code']
+  json['checks'].each do |service, check|
+    key = check['status_code']
     data[key] ||= []
-    data[key] << "#{service}:'#{details['details']}'"
+    data[key] << "#{service}:'#{check['details']}'"
   end
 
   final = []
@@ -131,7 +131,7 @@ if json['details'].size > 0
   end
   final = final.join("\n")
 else
-  final = "#{json['status'].upcase}. No details available."
+  final = "#{json['status'].upcase}. No individual check details available."
 end
 
 puts if $verbose
