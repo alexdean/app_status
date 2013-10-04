@@ -3,7 +3,7 @@
 # This is a Nagios script intended to check the JSON output from an application
 # using app_status to expose some monitoring data.
 #
-# ./check_app_status.rb for usage information.
+# `./check_app_status.rb --help` for usage information.
 #
 
 require 'optparse'
@@ -55,7 +55,7 @@ optparse = OptionParser.new do|opts|
     exit OK
   end
 
-  opts.on('-u', '--url VAL', 'Url to monitor') do |i|
+  opts.on('-u', '--url VAL', 'Url to monitor. ex: http://localhost:3000/status') do |i|
     options[:url] = i
   end
 
@@ -65,7 +65,7 @@ optparse = OptionParser.new do|opts|
     options[:password] = password
   end
 
-  opts.on('-t', '--timeout VAL', "Timeout after waiting this long for a response.") do |i|
+  opts.on('-t', '--timeout VAL', "In seconds. Includes time required for all checks to complete.") do |i|
     options[:timeout] = i.to_i
   end
 end
