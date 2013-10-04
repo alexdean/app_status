@@ -94,7 +94,9 @@ end
 http = Net::HTTP.new(uri.host, uri.port)
 http.read_timeout = options[:timeout]
 when_verbose {"timeout: #{options[:timeout]}s"}
-http.use_ssl = true if false
+use_ssl = uri.scheme == 'https' ? true : false
+http.use_ssl = use_ssl
+when_verbose {"using ssl: #{use_ssl}"}
 
 response = nil
 begin
