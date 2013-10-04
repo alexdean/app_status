@@ -3,6 +3,7 @@
 require 'optparse'
 require 'net/http'
 require 'json'
+require 'time'
 
   OK = 0
 WARN = 1
@@ -21,13 +22,21 @@ def exit_with(status, message)
   exit status
 end
 
-options = {}
+def when_verbose
+  msg = yield
+  puts "#{Time.now.iso8601}  #{msg}" if $verbose
+end
+
+options = {
+  timeout: 10
+}
+
 optparse = OptionParser.new do|opts|
   opts.banner = "Nagios check script for app_status. See https://github.com/alexdean/app_status"
 
-  options[:verbose] = false
+  $verbose = false
   opts.on('-v', '--verbose', 'Output more information') do
-    options[:verbose] = true
+    $verbose = true
   end
 
   opts.on('-V', '--version', 'Output version information') do
@@ -44,9 +53,14 @@ optparse = OptionParser.new do|opts|
     options[:url] = i
   end
 
-  opts.on('-a', '--auth', "HTTP basic auth in the form 'user:password'") do |i|
+  opts.on('-a', '--auth VAL', "HTTP basic auth in the form 'user:password'") do |i|
     user, password = i.split(':')
-    options[:basic_auth] = {user: user, password: password}
+    options[:user] = user
+    options[:password] = password
+  end
+
+  opts.on('-t', '--timeout VAL', "Timeout after waiting this long for a response.") do |i|
+    options[:timeout] = i.to_i
   end
 end
 
@@ -60,19 +74,36 @@ if ! options[:url]
   exit_with CRIT, '--url is required'
 end
 
-if options[:verbose]
-  print "Running with options: "
-  puts options.inspect
-  puts
+when_verbose { "options: #{options.inspect}"}
+
+uri = URI(options[:url])
+exit_with CRIT, "Malformed URL : #{options[:url]}" if ! uri.respond_to?(:request_uri)
+request = Net::HTTP::Get.new(uri.request_uri)
+
+if options[:user]
+  request.basic_auth options[:user], options[:password]
+  when_verbose {"basic auth user:'#{options[:user]}' password:'#{options[:password]}'"}
 end
 
-check_data = Net::HTTP.get(URI(options[:url]))
+http = Net::HTTP.new(uri.host, uri.port)
+http.read_timeout = options[:timeout]
+when_verbose {"timeout: #{options[:timeout]}s"}
+http.use_ssl = true if false
 
-if options[:verbose]
-  print "Response body: "
-  puts check_data
-  puts
+response = nil
+begin
+  response = http.request(request)
+rescue Exception => e
+  exit_with CRIT, "Exception when reading #{options[:url]}. #{e.class} #{e.message}."
 end
+
+response_code = response.code
+if response_code != '200'
+  exit_with CRIT, "Got #{response_code} response from #{options[:url]}."
+end
+
+check_data = response.body
+when_verbose { "response body: #{check_data}"}
 
 begin
   json = JSON.parse(check_data)
