@@ -3,6 +3,39 @@
 AppStatus is a Rails engine which makes it easy to expose application status
 data in a way easily consumed by Nagios or other monitoring packages.
 
+## Why?
+
+Defining health checks outside of your application (like in Nagios)
+has a few different problems.
+
+  1. The people who maintain nagios aren't necessarily
+     the same people who maintain the application.
+  1. Keeping the 2 systems in sync can be non-trivial with a fast-changing
+     application.
+  1. Failing to monitor new features, or monitoring the wrong things, leads
+     to a false sense of security.
+
+Instead, app_status lets you define your health checks right in the application
+itself and expose the results as a JSON service which is easy for Nagios
+to consume.
+
+The benefits basically come down to 1 major thing: Nagios doesn't need to know
+anything about your application. All Nagios needs is a 'healthy/not healthy'
+status report.
+
+This is good because:
+
+  1. As your app's feature set changes, you can deploy updated health checks
+     at the same time. No need for coordinated updates between the app and
+     the monitoring system.
+  1. Credentials for external services (like databases) can stay with your
+     app. Nagios doesn't need them.
+  1. You don't need nrpe to do local process checks. Your application can do
+     them for itself.
+  1. Your health checks can be testable methods just like all your other code.
+  1. You don't need to duplicate complex queries & other business logic over
+     to Nagios.
+
 ## Installation
 
 ### `Gemfile`
