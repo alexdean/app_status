@@ -117,7 +117,7 @@ individual checks.
 
 ## Nagios Integration
 
-[bin/check_app_status.rb](https://github.com/alexdean/app_status/blob/master/bin/check_app_status.rb)
+[check_app_status.rb](https://github.com/alexdean/app_status/blob/master/check_app_status.rb)
 is a Nagios check script which can be used to monitor the output from `app_status`
 
 ```
