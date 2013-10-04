@@ -131,13 +131,13 @@ if json['checks'].size > 0
     data[key] << "#{service}:'#{check['details']}'"
   end
 
-  final = []
+  final = ""
   status_names.each do |key,val|
     if data[key]
-      final << "#{val}: #{data[key].join(', ')}"
+      final += "#{val}\n"
+      final += "  - #{data[key].join("\n  - ")}\n"
     end
   end
-  final = final.join("\n")
 else
   final = "#{json['status'].upcase}. No individual check details available."
 end
