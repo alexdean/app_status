@@ -135,10 +135,11 @@ The script's exit status is derived from the overall status returned by the
 server. Individual detail items will be grouped by status for display.
 (Unknowns are displayed together, then criticals, then warnings, then OKs.)
 
-Sample output (using verbose mode)
+Sample output
 
 ```
 $ ./check_app_status.rb --url http://localhost:3000/status
+
 CRIT   failed_service         shit's on fire, yo.
 ---------------------------------------------------
 WARN   problematic_service    not looking good
