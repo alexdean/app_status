@@ -123,24 +123,48 @@ if ! json['status_code']
   exit_with CRIT, "JSON response #{options[:url]} does not contain 'status_code'."
 end
 
+final = ""
+line_len = 0
+# build output
 if json['checks'].size > 0
   data = {}
+  max_size = 0
+
+  # sort checks by severity.
   json['checks'].each do |service, check|
-    key = check['status_code']
-    data[key] ||= []
-    data[key] << "#{service}:'#{check['details']}'"
+    code = check['status_code']
+    max_size = [max_size, service.size].max
+    data[code] ||= []
+    data[code] << [service, check['details']]
   end
 
-  final = ""
-  status_names.each do |key,val|
-    if data[key]
-      final += "#{val}\n"
-      final += "  - #{data[key].join("\n  - ")}\n"
+  lines = []
+  # sort in severity order
+  status_names.each do |code,status|
+    if data[code]
+      lines += data[code].sort.
+        map {|i| status.ljust(4) +'   '+ i[0].ljust(max_size) +"   "+ i[1]}
+      lines << nil
     end
   end
+
+  # add group separators & build final report
+  line_len = lines.compact.map(&:size).max
+  lines.each do |line|
+    if line
+      final += line + "\n"
+    else
+      final += ('-'*line_len) + "\n"
+    end
+  end
+
 else
-  final = "#{json['status'].upcase}. No individual check details available."
+  msg = "#{json['status'].upcase}. No individual check details available.\n"
+  final += msg
+  line_len = msg.strip.size
 end
+
+final += "#{json['run_time_ms']} ms".rjust(line_len)
 
 puts if $verbose
 

@@ -117,11 +117,11 @@ individual checks.
 
 ## Nagios Integration
 
-[check_app_status.rb](https://github.com/alexdean/app_status/blob/master/check_app_status.rb)
+[check_app_status.rb](check_app_status.rb)
 is a Nagios check script which can be used to monitor the output from `app_status`
 
 ```
-$ bin/check_app_status.rb --help
+$ ./check_app_status.rb --help
 Nagios check script for app_status. See https://github.com/alexdean/app_status
     -v, --verbose                    Output more information
     -V, --version                    Output version information
@@ -138,11 +138,13 @@ server. Individual detail items will be grouped by status for display.
 Sample output (using verbose mode)
 
 ```
-$ bin/check_app_status.rb --url http://localhost:3000/status -v
-2013-10-03T20:54:16-05:00  options: {:timeout=>10, :url=>"http://localhost:3000/status"}
-2013-10-03T20:54:16-05:00  timeout: 10s
-2013-10-03T20:54:16-05:00  response body: {"status":"warning","status_code":1,"run_time_ms":0,"finished":"2013-10-04T01:54:16Z","details":{"some_service":{"status":"ok","status_code":0,"details":"Looks good!"},"failing_service":{"status":"warning","status_code":1,"details":"Oh noes!"}}}
-
-WARN: failing_service:'Oh noes!'
-OK: some_service:'Looks good!'
+$ ./check_app_status.rb --url http://localhost:3000/status
+CRIT   failed_service         shit's on fire, yo.
+---------------------------------------------------
+WARN   problematic_service    not looking good
+WARN   questionable_service   probably needs a look
+---------------------------------------------------
+OK     functional_service     happy!
+---------------------------------------------------
+                                               0 ms
 ```
