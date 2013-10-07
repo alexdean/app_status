@@ -4,9 +4,8 @@ describe AppStatus::StatusController do
 
   describe "GET index" do
     before(:each) do
-      AppStatus::CheckCollection.configure do |c|
-        c.add(name: 'some_service', status: :ok, details: 'foo')
-      end
+      AppStatus::CheckCollection.clear_checks!
+      AppStatus::CheckCollection.add_check('some_service') {[:ok, 'foo']}
     end
 
     it "should render json" do

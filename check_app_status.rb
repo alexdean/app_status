@@ -128,43 +128,41 @@ line_len = 0
 # build output
 if json['checks'].size > 0
   data = {}
-  max_size = 0
 
   # sort checks by severity.
   json['checks'].each do |service, check|
     code = check['status_code']
-    max_size = [max_size, service.size].max
     data[code] ||= []
-    data[code] << [service, check['details']]
+    data[code] << check.merge('service' => service)
   end
 
   lines = []
-  # sort in severity order
+  # output in severity order
   status_names.each do |code,status|
     if data[code]
-      lines += data[code].sort.
-        map {|i| status.ljust(4) +'   '+ i[0].ljust(max_size) +"   "+ i[1]}
-      lines << nil
+      header = []
+      details = []
+      data[code].sort_by{|c| c['service']}.each do |check|
+        header << check['service']
+        details << '--- ' +
+          check['service'].to_s +
+          ": " + check['details'].to_s + ", " +
+            check['ms'].to_s + "ms"
+      end
+
+      lines << status + ' ' + header.join(', ')
+      lines += details
+      lines << " "
     end
   end
 
-  # add group separators & build final report
-  line_len = lines.compact.map(&:size).max
-  lines.each do |line|
-    if line
-      final += line + "\n"
-    else
-      final += ('-'*line_len) + "\n"
-    end
-  end
+  final = lines.join("\n")
 
 else
   msg = "#{json['status'].upcase}. No individual check details available.\n"
   final += msg
   line_len = msg.strip.size
 end
-
-final += "#{json['run_time_ms']} ms".rjust(line_len)
 
 puts if $verbose
 

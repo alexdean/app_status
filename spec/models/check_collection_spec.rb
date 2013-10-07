@@ -6,81 +6,98 @@ describe AppStatus::CheckCollection do
     AppStatus::CheckCollection.clear_checks!
   end
 
-  describe "add" do
+  describe "configure" do
+
+    it "should yield itself" do
+      AppStatus::CheckCollection.configure do |c|
+        c.should eq AppStatus::CheckCollection
+      end
+    end
+
+  end
+
+  describe "clear_checks!" do
+    it "should remove all checks" do
+      c = AppStatus::CheckCollection.new
+      AppStatus::CheckCollection.add_check('test') { nil }
+      c.evaluate!
+      c.as_json['checks'].size.should eq 1
+
+      AppStatus::CheckCollection.clear_checks!
+      c.evaluate!
+      c.as_json['checks'].size.should eq 0
+    end
+  end
+
+  describe "add_check" do
 
     describe "validations" do
-      it "should raise an error if :name is not supplied" do
-        AppStatus::CheckCollection.configure {|c| c.add status: :ok }
-        c = AppStatus::CheckCollection.new
+      it "should raise an error if name is not supplied" do
         expect {
-          c.evaluate!
-        }.to raise_error(ArgumentError, ":name option is required.")
+          AppStatus::CheckCollection.add_check
+        }.to raise_error(ArgumentError, "wrong number of arguments (0 for 1)")
       end
 
-      it "should raise an error if :status is not supplied" do
-        AppStatus::CheckCollection.configure {|c| c.add name: 'foo' }
-        c = AppStatus::CheckCollection.new
+      it "should raise an error if block is not supplied" do
         expect {
-          c.evaluate!
-        }.to raise_error(ArgumentError, ":status option is required.")
-      end
-
-      it "should raise an error if an unrecognized option is supplied" do
-        AppStatus::CheckCollection.configure {|c| c.add name: 'foo', status: :ok, glork: '', ping: '' }
-        c = AppStatus::CheckCollection.new
-        expect {
-          c.evaluate!
-        }.to raise_error(ArgumentError, "Unrecognized option(s) for 'foo' check: glork,ping")
-      end
-
-      it "should raise an error if :status is unrecognized" do
-        AppStatus::CheckCollection.configure {|c| c.add name: 'foo', status: 'test' }
-        c = AppStatus::CheckCollection.new
-        expect {
-          c.evaluate!
-        }.to raise_error(ArgumentError, "'test' is not a valid status for check 'foo'.")
+          AppStatus::CheckCollection.add_check 'some_service'
+        }.to raise_error(ArgumentError, "No check defined for 'some_service'.")
       end
 
       it "should raise an error if a :name is used multiple times" do
-        AppStatus::CheckCollection.configure do |c|
-          c.add name: 'foo', status: :ok
-          c.add name: 'foo', status: :critical
-        end
-        c = AppStatus::CheckCollection.new
+        AppStatus::CheckCollection.add_check('foo') {[:ok, 'ok']}
         expect {
-          c.evaluate!
+          AppStatus::CheckCollection.add_check('foo') {[:ok, 'ok']}
         }.to raise_error(ArgumentError, "Check name 'foo' has already been added.")
       end
     end
 
   end
 
+
   describe "evaluate!" do
+
     it "should run configured checks each time it is called" do
       counter = 0
-      check = lambda { counter += 1; counter }
-      AppStatus::CheckCollection.configure do |c|
-        num_calls = check.call
-        c.add name: 'something', status: :ok, details: num_calls
-      end
+      AppStatus::CheckCollection.add_check('test') { counter += 1; [:ok, counter] }
 
       c = AppStatus::CheckCollection.new
 
       Timecop.freeze '2013-10-04T12:00:00Z' do
         c.evaluate!
         c.as_json[:finished].should eq '2013-10-04T12:00:00Z'
-        c.as_json[:checks][:something][:details].should eq "1"
+        c.as_json[:checks][:test][:details].should eq "1"
       end
 
       Timecop.freeze '2013-10-04T01:00:00Z' do
         c.evaluate!
         c.as_json[:finished].should eq '2013-10-04T01:00:00Z'
-        c.as_json[:checks][:something][:details].should eq "2"
+        c.as_json[:checks][:test][:details].should eq "2"
       end
     end
+
+    it "should set :unknown status for a check which does not return a status" do
+      AppStatus::CheckCollection.add_check('test') { nil }
+
+      c = AppStatus::CheckCollection.new
+      c.evaluate!
+      c.as_json[:checks][:test][:status].should eq :unknown
+      c.as_json[:checks][:test][:details].should eq "Check returned invalid status ''."
+    end
+
+    it "should set :unknown status for a check which returns an invalid status" do
+      AppStatus::CheckCollection.add_check('test') { 'huh?' }
+
+      c = AppStatus::CheckCollection.new
+      c.evaluate!
+      c.as_json[:checks][:test][:status].should eq :unknown
+      c.as_json[:checks][:test][:details].should eq "Check returned invalid status 'huh?'."
+    end
+
   end
 
   describe "as_json" do
+
     it "should use :unknown status if no checks are configured" do
       c = AppStatus::CheckCollection.new
       c.evaluate!
@@ -89,17 +106,86 @@ describe AppStatus::CheckCollection do
       data[:status].should eq :unknown
       data[:checks].should eq({})
     end
-  end
 
-  describe "configure" do
-    it "should add checks to be evaluated later" do
+    it "should set overall status to match the worst status among configured checks" do
+      c = AppStatus::CheckCollection.new
+
+      AppStatus::CheckCollection.add_check('a') { :ok }
+
+      c.evaluate!
+      c.as_json['status'].should eq :ok
+      c.as_json['checks'].size.should eq 1
+
+      AppStatus::CheckCollection.add_check('b') { :warning }
+
+      c.evaluate!
+      c.as_json['status'].should eq :warning
+      c.as_json['checks'].size.should eq 2
+
+      AppStatus::CheckCollection.add_check('c') { :critical }
+
+      c.evaluate!
+      c.as_json['status'].should eq :critical
+      c.as_json['checks'].size.should eq 3
+
+      AppStatus::CheckCollection.add_check('d') { :unknown }
+
+      c.evaluate!
+      c.as_json['status'].should eq :unknown
+      c.as_json['checks'].size.should eq 4
+    end
+
+    it "should include details on all checks" do
       AppStatus::CheckCollection.configure do |c|
-        c.add name: 'something', status: :ok
+        c.add_check('test1') { [:ok, 'looks good'] }
+        c.add_check('test2') { [:huh, 'invalid'] }
+        c.add_check('test3') { [:warning, 'not good'] }
+        c.add_check('test4') { [:critical, 'on fire'] }
+        c.add_check('test5') { [:unknown, 'no idea'] }
       end
 
       c = AppStatus::CheckCollection.new
-      c.evaluate!
-      data = c.as_json
+      Timecop.freeze('2013-10-05T12:00:00Z') { c.evaluate! }
+
+      c.as_json.should eq({
+        "status" => :unknown,
+        "status_code" => 3,
+        "ms" => instance_of(Fixnum),
+        "finished" => "2013-10-05T12:00:00Z",
+        "checks" => {
+          "test1" => {
+            "status" => :ok,
+            "status_code" => 0,
+            "details" => "looks good",
+            "ms" => instance_of(Fixnum)
+          },
+          "test2" => {
+            "status" => :unknown,
+            "status_code" => 3,
+            "details" => "Check returned invalid status 'huh'. invalid",
+            "ms" => instance_of(Fixnum)
+          },
+          "test3" => {
+            "status" => :warning,
+            "status_code" => 1,
+            "details" => "not good",
+            "ms" => instance_of(Fixnum)
+          },
+          "test4" => {
+            "status" => :critical,
+            "status_code" => 2,
+            "details" => "on fire",
+            "ms" => instance_of(Fixnum)
+          },
+          "test5" => {
+            "status" => :unknown,
+            "status_code" => 3,
+            "details" => "no idea",
+            "ms" => instance_of(Fixnum)
+          }
+        }
+      })
     end
+
   end
 end

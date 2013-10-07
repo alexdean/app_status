@@ -4,7 +4,7 @@ module AppStatus
 
   class CheckCollection
 
-    @@config_proc = nil
+    @@checks = HashWithIndifferentAccess.new
 
     # Add checks here.
     #
@@ -24,11 +24,11 @@ module AppStatus
     #
     #   end
     def self.configure(&block)
-      @@config_proc = block
+      yield self
     end
 
     def self.clear_checks!
-      @@config_proc = nil
+      @@checks = HashWithIndifferentAccess.new
     end
 
     def initialize
@@ -39,7 +39,7 @@ module AppStatus
          unknown: 3
       }.freeze
 
-      @checks = HashWithIndifferentAccess.new
+      @check_results = HashWithIndifferentAccess.new
       @eval_finished = nil
       @eval_time = 0
     end
@@ -50,24 +50,15 @@ module AppStatus
     # example:
     #   value = some_service_check
     #   c.add(:name => 'some_service', :status => :ok, :details => value)
-    def add(options={})
-      raise ArgumentError, ":name option is required." if ! options[:name]
-      raise ArgumentError, ":status option is required." if ! options[:status]
+    def self.add_check(name, &block)
+      raise ArgumentError, ":name option is required." if ! name
+      # raise ArgumentError, ":status option is required." if ! options[:status]
 
-      name = options[:name].to_sym
-      status = options[:status].to_sym
-      details = options[:details].to_s
+      name = name.to_sym
+      raise ArgumentError, "Check name '#{name}' has already been added." if @@checks.keys.include?(name.to_s)
+      raise ArgumentError, "No check defined for '#{name}'." if ! block_given?
 
-      # blow up if someone sends us options we don't understand.
-      other_options = options.keys - [:name, :status, :details]
-      if other_options.size > 0
-        raise ArgumentError, "Unrecognized option(s) for '#{name}' check: #{other_options.join(',')}"
-      end
-
-      raise ArgumentError, "'#{status}' is not a valid status for check '#{name}'." if ! valid_status?(status)
-      raise ArgumentError, "Check name '#{name}' has already been added." if @checks.keys.include?(name)
-
-      @checks[name] = {status: status, status_code: @valid_status[status], details: details}
+      @@checks[name] = block
     end
 
     def valid_status?(status)
@@ -77,28 +68,47 @@ module AppStatus
     # run the checks added via configure
     # results of the checks are available via as_json
     def evaluate!
-      start = Time.now
-      @checks = {}
-      @@config_proc.call(self) if @@config_proc
+      eval_start = Time.now
+      @check_results = {}
+      @@checks.each do |name,proc|
+        check_start = Time.now
+        status, details = proc.call
+        check_time = (Time.now - check_start) * 1000
+
+        status = status.to_sym if status
+        details = details.to_s if details
+
+        if ! valid_status?(status)
+          details = "Check returned invalid status '#{status}'. #{details}".strip
+          status = :unknown
+        end
+        @check_results[name] = {
+          status: status,
+          status_code: @valid_status[status],
+          details: details,
+          ms: check_time.to_i
+        }
+      end
+
       @eval_finished = Time.now.utc
-      @eval_time = (Time.now - start) * 1000
+      @eval_time = (Time.now - eval_start) * 1000
     end
 
     def as_json
-      if @checks.size == 0
+      if @check_results.size == 0
         max_status = :unknown
         max_int = @valid_status[max_status]
       else
-        max_int = @checks.inject([]){ |memo,val| memo << val[1][:status_code]; memo}.max
+        max_int = @check_results.inject([]){ |memo,val| memo << val[1][:status_code]; memo}.max
         max_status = @valid_status.invert[max_int]
       end
 
       HashWithIndifferentAccess.new({
         status: max_status,
         status_code: max_int,
-        run_time_ms: @eval_time.to_i,
+        ms: @eval_time.to_i,
         finished: @eval_finished.iso8601,
-        checks: @checks
+        checks: @check_results
       })
     end
   end

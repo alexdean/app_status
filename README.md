@@ -46,8 +46,6 @@ gem 'app_status'
 
 ### `config/routes.rb`
 
-Wire it up.
-
 ```ruby
 mount AppStatus::Engine, at: "/status"
 ```
@@ -63,19 +61,32 @@ This exposes the following URLs
 
 This is where you set up the checks which you want to be run when
 someone hits the URL above. Set up some calls which evaluate the health
-of your application and call `add` for each one.
+of your application and call `add_check` for each one.
+
+`add_check` expects a service name, plus a block to be evaluated to determine
+the health of that service. The block should return either a status value, or
+a 2-element array with status and some details.
 
 ```ruby
 AppStatus::CheckCollection.configure do |c|
-  value = some_service_check
-  c.add(:name => 'some_service', :status => :ok, :details => value)
+
+  c.add_check('some_service') do
+    details = do_something_to_check_your_service
+    status = (details != "FAIL") ? :ok : :critical
+    [status, details]
+  end
+
+  c.add_check('failing_service') do
+    :critical # you can return just a status if desired.
+  end
 end
 ```
 
-The checks that you set up here are not run when you configure them. They're
-run whenever someone hits the check URL.
+The details string should be concise. `app_status` does its best to provide
+readable output, and Nagios does its best to make this impossible to actually
+do well.
 
-Status values (in ascending order of seriousness)
+Valid status values (in ascending order of seriousness) are:
   - :ok
   - :warning
   - :critical
@@ -83,8 +94,9 @@ Status values (in ascending order of seriousness)
 
 These are set up to be compatible with Nagios.
 
-Details doesn't have to be a string. It can be anything which is serializable
-as JSON.
+Keep in mind that anyone who hits your status URL can cause your checks to run,
+so if they expose sensitive data or are a potential DOS vector you should
+probably protect them with some kind of authentication.
 
 ## Usage
 
@@ -95,25 +107,26 @@ Output will look something like this:
 {
   "status": "critical",
   "status_code": 2,
-  "run_time_ms": 52,
+  "ms": 52,
   "finished": "2013-10-03T21:28:10Z",
   "checks": {
     "some_service": {
       "status": "ok",
       "status_code": 0,
-      "details": "Looks good!"
+      "details": "Looks good!",
+      "ms": 30
     },
     "failing_service": {
       "status": "critical",
       "status_code": 2,
-      "details": "Oh noes!"
+      "details": "",
+      "ms": 20
     }
   }
 }
 ```
 
-The overall status will be the worst status which is actually observed in your
-individual checks.
+The overall status will be the worst value observed in your individual checks.
 
 ## Nagios Integration
 
