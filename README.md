@@ -153,12 +153,13 @@ Sample output
 ```
 $ ./check_app_status.rb --url http://localhost:3000/status
 
-CRIT   failed_service         shit's on fire, yo.
----------------------------------------------------
-WARN   problematic_service    not looking good
-WARN   questionable_service   probably needs a look
----------------------------------------------------
-OK     functional_service     happy!
----------------------------------------------------
-                                               0 ms
+CRIT failed_service
+--- failed_service: shit's on fire yo, 501ms
+
+WARN problematic_service
+--- problematic_service: not looking good, 2001ms
+
+OK ok_process, ok_process_2
+--- ok_process: these are some details, 0ms
+--- ok_process_2: more details on another process, 0ms
 ```

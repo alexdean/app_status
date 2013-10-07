@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    app_status (0.1.1)
+    app_status (1.0.0)
       haml
       haml-rails
       rails (~> 3.2.13)
