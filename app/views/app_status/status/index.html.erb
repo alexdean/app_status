@@ -1,0 +1,14 @@
+<% data = @checks.as_json %>
+
+<h1 class="<%= data[:status] %>">Current Status : <%= data[:status] %></h1>
+
+<table class="table">
+  <% data[:checks].each do |key,data| %>
+  <tr class="<%= data[:status] %>">
+    <td><%= data[:status] %></td>
+    <td><%= key %></td>
+    <td><%= data[:details] %></td>
+    <td><%= data[:ms] %></td>
+  </tr>
+  <% end %>
+</table>
