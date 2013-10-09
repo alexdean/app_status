@@ -2,7 +2,7 @@
 
   <h1 class="<%= @checks.status %>">Current Status : <%= @checks.status %></h1>
 
-  <% if checks.size > 0 %>
+  <% if @checks.size > 0 %>
     <table>
     <% @checks.each do |check| %>
       <tr class="check <%= check.status %> <%= check.name %>" data-check-name="<%= check.name %>">

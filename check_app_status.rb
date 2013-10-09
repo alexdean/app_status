@@ -164,6 +164,10 @@ else
   line_len = msg.strip.size
 end
 
+if json['more_info']
+  final += "\nMore info at #{json['more_info']}"
+end
+
 puts if $verbose
 
 exit_with json['status_code'], final
