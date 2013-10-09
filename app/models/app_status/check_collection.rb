@@ -4,6 +4,9 @@ module AppStatus
 
   class CheckCollection
 
+    include Enumerable
+
+    @@check_descriptions = HashWithIndifferentAccess.new
     @@checks = HashWithIndifferentAccess.new
 
     # Add checks here.
@@ -28,88 +31,116 @@ module AppStatus
     end
 
     def self.clear_checks!
+      @@check_descriptions = HashWithIndifferentAccess.new
       @@checks = HashWithIndifferentAccess.new
     end
 
-    def initialize
-      @valid_status = {
+    def self.valid_status_map
+      {
               ok: 0,
          warning: 1,
         critical: 2,
          unknown: 3
-      }.freeze
-
-      @check_results = HashWithIndifferentAccess.new
-      @eval_finished = nil
-      @eval_time = 0
+      }
     end
 
     # add the results of a check to the collection.
     # this should describe the health of some portion of your application
+    # The check block you supply should return a status value, or a
+    # [:status, 'details'] array.
     #
     # example:
-    #   value = some_service_check
-    #   c.add(:name => 'some_service', :status => :ok, :details => value)
+    #   AppStatus::CheckCollection.add_check('some_service') do
+    #     [:ok, 'these are optional details']
+    #   end
     def self.add_check(name, &block)
       raise ArgumentError, ":name option is required." if ! name
-      # raise ArgumentError, ":status option is required." if ! options[:status]
 
       name = name.to_sym
       raise ArgumentError, "Check name '#{name}' has already been added." if @@checks.keys.include?(name.to_s)
       raise ArgumentError, "No check defined for '#{name}'." if ! block_given?
 
-      @@checks[name] = block
+      item = CheckItem.new(name)
+      item.proc = block
+      @@checks[name] = item
     end
 
-    def valid_status?(status)
-      @valid_status.keys.include?(status)
+    # add a long-form description of a check
+    # service must have already been added via add_check.
+    #
+    # example:
+    #   AppStatus::CheckCollection.configure do |c|
+    #     c.add_check('some_service') do
+    #       [:ok, 'these are optional details']
+    #     end
+    #     c.add_decription 'some_service', <<-EOF
+    # some_service is pretty easy to understand.
+    # it always works, no matter what.
+    # but if it were **harder to comprehend** you
+    # could add markdown here to explain what it is
+    # and what to do if it starts failing.
+    #     EOF
+    #
+    def self.add_description(name, markdown)
+      raise ArgumentError, "Check '#{name}' is not defined." if ! @@checks[name]
+      @@checks[name].description = markdown
+    end
+
+
+
+    attr_reader :finished, :ms, :status, :status_code
+
+
+    def initialize
+      reset
+    end
+
+    def reset
+      @finished = nil
+      @ms = 0
+      @status = :ok
+      @status_code = self.class.valid_status_map[@status]
+      @@checks.each {|key,check| check.reset }
+    end
+
+    def each
+      @@checks.each {|name,check| yield check }
     end
 
     # run the checks added via configure
     # results of the checks are available via as_json
     def evaluate!
       eval_start = Time.now
-      @check_results = {}
-      @@checks.each do |name,proc|
-        check_start = Time.now
-        status, details = proc.call
-        check_time = (Time.now - check_start) * 1000
 
-        status = status.to_sym if status
-        details = details.to_s if details
+      reset
 
-        if ! valid_status?(status)
-          details = "Check returned invalid status '#{status}'. #{details}".strip
-          status = :unknown
-        end
-        @check_results[name] = {
-          status: status,
-          status_code: @valid_status[status],
-          details: details,
-          ms: check_time.to_i
-        }
+      @@checks.each do |name,check|
+        @status_code = [check.evaluate!, @status_code].max
       end
 
-      @eval_finished = Time.now.utc
-      @eval_time = (Time.now - eval_start) * 1000
+      @finished = Time.now.utc
+      @ms = (Time.now - eval_start) * 1000
+
+      if @@checks.size == 0
+        @status = :unknown
+        @status_code = self.class.valid_status_map[@status]
+      else
+        @status = self.class.valid_status_map.invert[@status_code]
+      end
+    end
+
+    def as_hash
+      HashWithIndifferentAccess.new({
+        status: @status,
+        status_code: @status_code,
+        ms: @ms.to_i,
+        finished: @finished.iso8601,
+        checks: @@checks.inject({}) {|memo,(name,check)| memo[name] = check.as_hash; memo}
+      })
     end
 
     def as_json
-      if @check_results.size == 0
-        max_status = :unknown
-        max_int = @valid_status[max_status]
-      else
-        max_int = @check_results.inject([]){ |memo,val| memo << val[1][:status_code]; memo}.max
-        max_status = @valid_status.invert[max_int]
-      end
-
-      HashWithIndifferentAccess.new({
-        status: max_status,
-        status_code: max_int,
-        ms: @eval_time.to_i,
-        finished: @eval_finished.iso8601,
-        checks: @check_results
-      })
+      as_hash
     end
   end
 

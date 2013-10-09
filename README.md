@@ -63,6 +63,8 @@ This is where you set up the checks which you want to be run when
 someone hits the URL above. Set up some calls which evaluate the health
 of your application and call `add_check` for each one.
 
+#### add_check
+
 `add_check` expects a service name, plus a block to be evaluated to determine
 the health of that service. The block should return either a status value, or
 a 2-element array with status and some details.
@@ -93,6 +95,37 @@ Valid status values (in ascending order of seriousness) are:
   - :unknown
 
 These are set up to be compatible with Nagios.
+
+#### add_description
+
+`add_description` allows you to specify extended description and troubleshooting
+information for any check which has been added via `add_check`.
+
+Currently these are not returned via the JSON endpoint, but are available
+via the HTML status page.
+
+Description information is parsed by kramdown for display. Refer to the
+[kramdown style guide](http://kramdown.rubyforge.org/quickref.html) for
+usage information.
+
+```ruby
+AppStatus::CheckCollection.configure do |c|
+
+  c.add_check('some_service') do
+    [:critical, 'what is going on']
+  end
+  c.add_description 'some_service', <<-EOF
+some_service failures indicate that some_service is going wrong.
+
+this is handy since nagios really requires brief output, but sometimes you need
+more space to explain what a check is.
+
+think of it as the answer to the problem of "That guy is on vaction, but his
+app is raising alarms. WTF do I do?"
+  EOF
+
+end
+```
 
 Keep in mind that anyone who hits your status URL can cause your checks to run,
 so if they expose sensitive data or are a potential DOS vector you should

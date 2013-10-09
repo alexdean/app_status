@@ -1,14 +1,32 @@
-<% data = @checks.as_json %>
+<div class="app_status">
 
-<h1 class="<%= data[:status] %>">Current Status : <%= data[:status] %></h1>
+  <h1 class="<%= @checks.status %>">Current Status : <%= @checks.status %></h1>
 
-<table class="table">
-  <% data[:checks].each do |key,data| %>
-  <tr class="<%= data[:status] %>">
-    <td><%= data[:status] %></td>
-    <td><%= key %></td>
-    <td><%= data[:details] %></td>
-    <td><%= data[:ms] %></td>
-  </tr>
+  <table>
+  <% @checks.each do |check| %>
+    <tr class="check <%= check.status %> <%= check.name %>" data-check-name="<%= check.name %>">
+      <td class="status"><%= check.status %></td>
+      <td class="name"><%= check.name %></td>
+      <td class="details"><%= check.details %></td>
+      <td class="ms"><%= check.ms %>ms</td>
+    </tr>
+    <% if check.description.present? -%>
+      <tr class="<%= check.name %> description" style="display: none;">
+        <td colspan="4">
+          <%= check.html_description.html_safe %>
+        </td>
+      </tr>
+    <% end %>
   <% end %>
-</table>
+  </table>
+
+</div>
+
+<script>
+  $(function() {
+    $('.app_status .check').click(function() {
+      var checkName = $(this).data('check-name');
+      $('.'+checkName+'.description').fadeToggle();
+    })
+  })
+</script>

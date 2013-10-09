@@ -10,13 +10,14 @@ Gem::Specification.new do |s|
   s.authors     = ["Alex Dean"]
   s.email       = ["alex@crackpot.org"]
   s.homepage    = "http://github.com/alexdean/app_status"
-  s.summary     = "AppStatus is a Rails engine for exposing app data to Nagios.."
+  s.summary     = "AppStatus is a Rails engine for exposing app data to Nagios."
   s.description = "AppStatus provides a URL which is easily consumable by Nagios or other monitoring tools."
 
   s.files = Dir["{app,bin,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.md"]
   s.test_files = Dir["spec/**/*"]
 
   s.add_dependency "rails"
+  s.add_dependency "kramdown"
 
   s.add_development_dependency "rspec"
   s.add_development_dependency "rspec-rails", "~> 2.6"

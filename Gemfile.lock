@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     app_status (1.0.0)
+      kramdown
       rails
 
 GEM
@@ -45,6 +46,7 @@ GEM
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.8.0)
+    kramdown (1.2.0)
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
@@ -102,7 +104,7 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
-    tzinfo (0.3.37)
+    tzinfo (0.3.38)
 
 PLATFORMS
   ruby
