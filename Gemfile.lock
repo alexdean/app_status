@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    app_status (1.1.1)
+    app_status (1.1.2)
       kramdown
       rails
 
