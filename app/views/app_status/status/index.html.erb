@@ -2,23 +2,27 @@
 
   <h1 class="<%= @checks.status %>">Current Status : <%= @checks.status %></h1>
 
-  <table>
-  <% @checks.each do |check| %>
-    <tr class="check <%= check.status %> <%= check.name %>" data-check-name="<%= check.name %>">
-      <td class="status"><%= check.status %></td>
-      <td class="name"><%= check.name %></td>
-      <td class="details"><%= check.details %></td>
-      <td class="ms"><%= check.ms %>ms</td>
-    </tr>
-    <% if check.description.present? -%>
-      <tr class="<%= check.name %> description" style="display: none;">
-        <td colspan="4">
-          <%= check.html_description.html_safe %>
-        </td>
+  <% if checks.size > 0 %>
+    <table>
+    <% @checks.each do |check| %>
+      <tr class="check <%= check.status %> <%= check.name %>" data-check-name="<%= check.name %>">
+        <td class="status"><%= check.status %></td>
+        <td class="name"><%= check.name %></td>
+        <td class="details"><%= check.details %></td>
+        <td class="ms"><%= check.ms %>ms</td>
       </tr>
+      <% if check.description.present? -%>
+        <tr class="<%= check.name %> description" style="display: none;">
+          <td colspan="4">
+            <%= check.html_description.html_safe %>
+          </td>
+        </tr>
+      <% end %>
     <% end %>
+    </table>
+  <% else %>
+    <div>No checks are currently configured.</div>
   <% end %>
-  </table>
 
 </div>
 

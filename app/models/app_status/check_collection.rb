@@ -107,6 +107,10 @@ module AppStatus
       @@checks.each {|name,check| yield check }
     end
 
+    def size
+      @@checks.size
+    end
+
     # run the checks added via configure
     # results of the checks are available via as_json
     def evaluate!
