@@ -47,15 +47,18 @@ gem 'app_status'
 ### `config/routes.rb`
 
 ```ruby
-mount AppStatus::Engine, at: "/status"
+mount AppStatus::Engine => "/status(.:format)", defaults: {format: 'json'}
 ```
 
 This exposes the following URLs
   - `http://localhost:3000/status`
     renders html or json according to Accept headers. Defaults to JSON.
-  - `http://localhost:3000/status/index.json`
-  - `http://localhost:3000/status/index.html` <-- fugly
+  - `http://localhost:3000/status.json`
+  - `http://localhost:3000/status.html`
 
+The HTML status page will use your application's default layout.
+
+**NOTE :** The engine assumes that you have a top-level `::ApplicationController`.
 
 ### `config/initializers/app_status.rb`
 
