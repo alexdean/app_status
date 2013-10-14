@@ -1,5 +1,4 @@
 <div class="app_status">
-
   <h1 class="<%= @checks.status %>">Current Status : <%= @checks.status %></h1>
 
   <% if @checks.size > 0 %>
@@ -10,6 +9,9 @@
         <td class="name"><%= check.name %></td>
         <td class="details"><%= check.details %></td>
         <td class="ms"><%= check.ms %>ms</td>
+        <td class="more_info">
+          <% if check.description.present? -%>More Info<% end %>
+        </td>
       </tr>
       <% if check.description.present? -%>
         <tr class="<%= check.name %> description" style="display: none;">

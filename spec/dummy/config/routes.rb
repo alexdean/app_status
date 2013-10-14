@@ -1,3 +1,5 @@
 Rails.application.routes.draw do
-  mount AppStatus::Engine => "/status"
+  resources :widgets
+
+  mount AppStatus::Engine => "/status(.:format)", defaults: {format: 'json'}
 end
