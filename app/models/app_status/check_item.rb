@@ -1,11 +1,9 @@
-require 'kramdown'
-
 module AppStatus
   class CheckItem
     attr_reader :name, :status, :status_code, :details, :ms
     attr_accessor :proc, :description
 
-    def initialize(name)
+    def initialize(name, include_description: false)
       @name = name
       @proc = nil
       @description = ''
@@ -42,17 +40,15 @@ module AppStatus
       return @status_code
     end
 
-    def as_hash
-      {
+    def as_hash(include_description: false)
+      out = {
         status: @status,
         status_code: @status_code,
         details: @details,
         ms: @ms
       }
-    end
-
-    def html_description
-      Kramdown::Document.new(@description).to_html
+      out[:description] = description if include_description
+      out
     end
   end
 end

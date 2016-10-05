@@ -4,7 +4,7 @@ module AppStatus
       @checks = CheckCollection.new
       @checks.evaluate!
 
-      json_data = @checks.as_json
+      json_data = @checks.as_json(include_descriptions: params[:descriptions])
 
       more_info = app_status_engine.root_url
       # try to build html url, when main app has route like '/status(.:format)'
@@ -13,10 +13,7 @@ module AppStatus
       end
       json_data['more_info'] = more_info
 
-      respond_to do |format|
-        format.json { render json: json_data}
-        format.html
-      end
+      render json: json_data
     end
   end
 end

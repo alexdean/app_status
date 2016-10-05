@@ -35,7 +35,7 @@ describe AppStatus::CheckCollection do
       it "should raise an error if name is not supplied" do
         expect {
           AppStatus::CheckCollection.add_check
-        }.to raise_error(ArgumentError, "wrong number of arguments (0 for 1)")
+        }.to raise_error(ArgumentError)
       end
 
       it "should raise an error if block is not supplied" do

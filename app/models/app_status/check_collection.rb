@@ -133,18 +133,21 @@ module AppStatus
       end
     end
 
-    def as_hash
+    def as_hash(include_descriptions: false)
       HashWithIndifferentAccess.new({
         status: @status,
         status_code: @status_code,
         ms: @ms.to_i,
         finished: @finished.iso8601,
-        checks: @@checks.inject({}) {|memo,(name,check)| memo[name] = check.as_hash; memo}
+        checks: @@checks.inject({}) do |memo,(name,check)|
+          memo[name] = check.as_hash(include_description: include_descriptions)
+          memo
+        end
       })
     end
 
-    def as_json
-      as_hash
+    def as_json(include_descriptions: false)
+      as_hash(include_descriptions: include_descriptions)
     end
   end
 

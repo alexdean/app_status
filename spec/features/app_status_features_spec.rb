@@ -31,30 +31,6 @@ describe "status" do
     page.should have_content_type('application/json')
   end
 
-  describe "html page" do
-
-    it "is available at status.html" do
-      visit '/status.html'
-      page.should have_content_type('text/html')
-    end
-
-    it "is available at /status/index.html" do
-      visit '/status/index.html'
-      page.should have_content_type('text/html')
-    end
-
-    it "renders in the main application's default layout" do
-      visit '/status.html'
-      page.title.should eq 'Dummy'
-    end
-
-    it "doesn't break route urls in main layout" do
-      visit '/status.html'
-      page.find('#widget_menu').should have_content('Widgets are at http://www.example.com/widgets.')
-    end
-
-  end
-
   describe "json endpoint" do
 
     it "is available at status.json" do
