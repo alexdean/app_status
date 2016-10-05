@@ -187,5 +187,28 @@ describe AppStatus::CheckCollection do
       })
     end
 
+    it "should include optionally include descriptions" do
+      AppStatus::CheckCollection.configure do |c|
+        c.add_check('test1') { [:ok, 'looks good'] }
+        c.add_description 'test1', 'test1 description'
+
+        c.add_check('test2') { [:ok, 'looks good'] }
+        c.add_description 'test2', 'test2 description'
+      end
+
+      c = AppStatus::CheckCollection.new
+      c.evaluate!
+
+      result = c.as_json(include_descriptions: true)
+
+      expect(
+        result['checks']['test1']['description']
+      ).to eq 'test1 description'
+
+      expect(
+        result['checks']['test2']['description']
+      ).to eq 'test2 description'
+    end
+
   end
 end

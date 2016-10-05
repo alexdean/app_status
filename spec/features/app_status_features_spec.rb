@@ -60,7 +60,15 @@ describe "status" do
       data['status_code'].should eq 0
       data['checks']['some_service']['status'].should eq 'ok'
       data['checks']['some_service']['details'].should eq 'foo'
+      data['checks']['some_service']['description'].should eq nil
     end
 
+    it "may include check descriptions" do
+      visit '/status.json?descriptions=1'
+      page.should have_content_type('application/json')
+      data = JSON.parse(page.body)
+
+      data['checks']['some_service']['description'].should eq 'more info'
+    end
   end
 end
