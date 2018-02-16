@@ -1,3 +1,8 @@
+## unreleased
+
+  - BREAKING CHANGE: drop HTML version of the status page. [#3](https://github.com/alexdean/app_status/pull/3)
+  - add a built-in check for expected ruby version. [notes](README.md#ruby_version-check)
+
 ## v1.2.0 14 Oct, 2013
 
   - use main app's default layout for html status report

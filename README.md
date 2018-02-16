@@ -134,6 +134,35 @@ Keep in mind that anyone who hits your status URL can cause your checks to run,
 so if they expose sensitive data or are a potential DOS vector you should
 probably protect them with some kind of authentication.
 
+## Built-In Checks
+
+As of version 2.0.0, app_status started including a set of built-in checks
+which can be installed. Have a look in
+[`lib/app_status/checks`](https://github.com/alexdean/app_status/tree/master/lib/app_status/checks)
+for a full list.
+
+### `ruby_version` check
+
+Verifies that the running version of ruby is as expected.
+
+Default is to read the expected version from a `.ruby-version` file in the
+rails root directory.
+
+```ruby
+# config/initializers/app_status.rb
+require 'app_status/checks/ruby_version'
+AppStatus::Checks::RubyVersion.install!
+```
+
+If you wish to specify the expected version string by another method, that's
+also supported.
+
+```ruby
+# config/initializers/app_status.rb
+require 'app_status/checks/ruby_version'
+AppStatus::Checks::RubyVersion.install!(expected_version: '2.5.0')
+```
+
 ## Usage
 
 `$ curl -H 'Accept: application/json' http://localhost:3000/status`
