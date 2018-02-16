@@ -10,13 +10,13 @@ RSpec::Matchers.define :have_content_type do |expected|
     extract_content_type(actual) == expected
   end
 
-  failure_message_for_should do |actual|
+  failure_message do |actual|
     "expected that page's content type would be '#{expected}', but was '#{extract_content_type(actual)}'"
   end
 
 end
 
-describe "status" do
+describe "status", type: :feature do
 
   before(:each) do
     AppStatus::CheckCollection.clear_checks!

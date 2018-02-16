@@ -147,41 +147,41 @@ describe AppStatus::CheckCollection do
       c = AppStatus::CheckCollection.new
       Timecop.freeze('2013-10-05T12:00:00Z') { c.evaluate! }
 
-      c.as_json.should eq({
+      expect(c.as_json).to match({
         "status" => :unknown,
         "status_code" => 3,
-        "ms" => instance_of(Fixnum),
+        "ms" => an_instance_of(Fixnum),
         "finished" => "2013-10-05T12:00:00Z",
         "checks" => {
           "test1" => {
             "status" => :ok,
             "status_code" => 0,
             "details" => "looks good",
-            "ms" => instance_of(Fixnum)
+            "ms" => an_instance_of(Fixnum)
           },
           "test2" => {
             "status" => :unknown,
             "status_code" => 3,
             "details" => "Check returned invalid status 'huh'. invalid",
-            "ms" => instance_of(Fixnum)
+            "ms" => an_instance_of(Fixnum)
           },
           "test3" => {
             "status" => :warning,
             "status_code" => 1,
             "details" => "not good",
-            "ms" => instance_of(Fixnum)
+            "ms" => an_instance_of(Fixnum)
           },
           "test4" => {
             "status" => :critical,
             "status_code" => 2,
             "details" => "on fire",
-            "ms" => instance_of(Fixnum)
+            "ms" => an_instance_of(Fixnum)
           },
           "test5" => {
             "status" => :unknown,
             "status_code" => 3,
             "details" => "no idea",
-            "ms" => instance_of(Fixnum)
+            "ms" => an_instance_of(Fixnum)
           }
         }
       })
