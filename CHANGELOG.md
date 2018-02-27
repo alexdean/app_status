@@ -1,4 +1,4 @@
-## unreleased
+## v2.0.0 27 Feb, 2018
 
   - BREAKING CHANGE: drop HTML version of the status page. [#3](https://github.com/alexdean/app_status/pull/3)
   - add a built-in check for expected ruby version. [notes](README.md#ruby_version-check)
