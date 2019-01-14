@@ -1,3 +1,12 @@
+---
+version: 1.0
+vertical: Tools
+production:
+  endpoint_url: https://ted.com
+staging:
+  endpoint_url: https://staging.ted.com
+---
+
 # AppStatus
 
 AppStatus is a Rails engine which makes it easy to expose application status
