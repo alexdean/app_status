@@ -50,15 +50,8 @@ gem 'app_status'
 mount AppStatus::Engine => "/status(.:format)", defaults: {format: 'json'}
 ```
 
-This exposes the following URLs
-  - `http://localhost:3000/status`
-    renders html or json according to Accept headers. Defaults to JSON.
-  - `http://localhost:3000/status.json`
-  - `http://localhost:3000/status.html`
-
-The HTML status page will use your application's default layout.
-
-**NOTE :** The engine assumes that you have a top-level `::ApplicationController`.
+This exposes `http://localhost:3000/status.json`. (Support for HTML output was
+dropped in v2.0. see [PR #3](https://github.com/alexdean/app_status/pull/3).)
 
 ### `config/initializers/app_status.rb`
 
@@ -104,12 +97,8 @@ These are set up to be compatible with Nagios.
 `add_description` allows you to specify extended description and troubleshooting
 information for any check which has been added via `add_check`.
 
-Currently these are not returned via the JSON endpoint, but are available
-via the HTML status page.
-
-Description information is parsed by kramdown for display. Refer to the
-[kramdown style guide](http://kramdown.rubyforge.org/quickref.html) for
-usage information.
+These descriptions are not included in the `status.json` payload by default.
+Add `?descriptions=1` to include them.
 
 ```ruby
 AppStatus::CheckCollection.configure do |c|
