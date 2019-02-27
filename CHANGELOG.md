@@ -1,3 +1,12 @@
+## v2.0.1 27 Feb, 2019
+
+  - Update documentation and remove outdated references to the HTML status page.
+    (Which was removed in `v2.0.0`)
+  - The `more_info` field in the returned payload no longer refers to the HTML
+    version either. Now points to the JSON version with descriptions included.
+
+Feb 27th is a good day for `app_status` releases, apparently.
+
 ## v2.0.0 27 Feb, 2018
 
   - BREAKING CHANGE: drop HTML version of the status page. [#3](https://github.com/alexdean/app_status/pull/3)
