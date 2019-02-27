@@ -43,12 +43,12 @@ describe "status", type: :feature do
       page.should have_content_type('application/json')
     end
 
-    it "links to html status page" do
+    it "links to more-details page" do
       visit '/status.json'
       page.should have_content_type('application/json')
       data = JSON.parse(page.body)
 
-      data['more_info'].should eq 'http://www.example.com/status.html'
+      data['more_info'].should eq 'http://www.example.com/status/?descriptions=true'
     end
 
     it "contains status information" do
