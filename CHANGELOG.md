@@ -1,3 +1,7 @@
+## v3.0.0 (unreleased)
+
+  - Drop support for rails 4.
+
 ## v2.0.1 27 Feb, 2019
 
   - Update documentation and remove outdated references to the HTML status page.
