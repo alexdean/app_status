@@ -3,6 +3,10 @@
 AppStatus is a Rails engine which makes it easy to expose application status
 data in a way easily consumed by Nagios or other monitoring packages.
 
+## Build Status
+
+[![Build Status](https://travis-ci.org/alexdean/app_status.svg?branch=master)](https://travis-ci.org/alexdean/app_status)
+
 ## Why?
 
 Defining health checks outside of your application (like in Nagios)
