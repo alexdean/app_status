@@ -6,12 +6,6 @@ describe AppStatus::CheckCollection do
     AppStatus::CheckCollection.clear_checks!
   end
 
-  describe 'testing github actions' do
-    it 'should fail' do
-      expect(true).to eq false
-    end
-  end
-
   describe "configure" do
     it "should yield itself" do
       AppStatus::CheckCollection.configure do |c|
