@@ -5,7 +5,7 @@ data in a way easily consumed by Nagios or other monitoring packages.
 
 ## Build Status
 
-![Test Suite](https://github.com/alexdean/app_status/actions/workflows/rspec.yml/badge.svg)
+[![Test Suite](https://github.com/alexdean/app_status/actions/workflows/rspec.yml/badge.svg)](https://github.com/alexdean/app_status/actions/workflows/rspec.yml)
 
 ## Why?
 
