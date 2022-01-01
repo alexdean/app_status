@@ -1,7 +1,14 @@
 source 'https://rubygems.org'
 
 group :development, :test do
-  gem 'rails', '~> 7.0.0'
+  # "Rails 7.0.0 is not compatible with Ruby 3.1.0. ... Use 7-0-stable branch until Rails 7.0.1 is released."
+  # https://gist.github.com/yahonda/2776d8d7b6ea7045359f38c10449937b#rails-70z
+  # https://github.com/rails/rails/issues/43998
+  if RUBY_VERSION[0..2] == '3.1'
+    gem "rails", github: "rails/rails", branch: "7-0-stable"
+  else
+    gem 'rails', '~> 7.0.0'
+  end
 end
 
 gemspec path: '../'
