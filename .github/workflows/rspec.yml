@@ -43,7 +43,9 @@ jobs:
     - name: Install dependencies
       run: bundle install --gemfile=${{ matrix.gemfile }}
     - name: Run tests
-      run: REPORTS=true bundle exec --gemfile=${{ matrix.gemfile }} rake spec
+      env:
+        REPORTS: true
+      run: bundle exec --gemfile=${{ matrix.gemfile }} rake spec
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v2
       if: always() # always run even if the previous step fails
