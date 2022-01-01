@@ -11,4 +11,5 @@ group :development, :test do
   gem 'rspec-rails', '~> 3.8.0'
   gem "timecop", "~> 0.9.1"
   gem "capybara", "~> 2.14"
+  gem 'ci_reporter_rspec'
 end
