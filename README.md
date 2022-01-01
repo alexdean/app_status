@@ -70,16 +70,17 @@ the health of that service. The block should return either a status value, or
 a 2-element array with status and some details.
 
 ```ruby
-AppStatus::CheckCollection.configure do |c|
+Rails.application.config.to_prepare do
+  AppStatus::CheckCollection.configure do |c|
+    c.add_check('some_service') do
+      details = do_something_to_check_your_service
+      status = (details != "FAIL") ? :ok : :critical
+      [status, details]
+    end
 
-  c.add_check('some_service') do
-    details = do_something_to_check_your_service
-    status = (details != "FAIL") ? :ok : :critical
-    [status, details]
-  end
-
-  c.add_check('failing_service') do
-    :critical # you can return just a status if desired.
+    c.add_check('failing_service') do
+      :critical # you can return just a status if desired.
+    end
   end
 end
 ```
@@ -110,14 +111,14 @@ AppStatus::CheckCollection.configure do |c|
   c.add_check('some_service') do
     [:critical, 'what is going on']
   end
-  c.add_description 'some_service', <<-EOF
-some_service failures indicate that some_service is going wrong.
+  c.add_description 'some_service', <<~EOF
+  some_service failures indicate that some_service is going wrong.
 
-this is handy since nagios really requires brief output, but sometimes you need
-more space to explain what a check is.
+  this is handy since nagios really requires brief output, but sometimes you need
+  more space to explain what a check is.
 
-think of it as the answer to the problem of "That guy is on vaction, but his
-app is raising alarms. WTF do I do?"
+  think of it as the answer to the problem of "That guy is on vaction, but his
+  app is raising alarms. WTF do I do?"
   EOF
 
 end
