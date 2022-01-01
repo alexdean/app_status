@@ -19,6 +19,7 @@ describe AppStatus::CheckCollection do
       c = AppStatus::CheckCollection.new
       AppStatus::CheckCollection.add_check('test') { nil }
       c.evaluate!
+      raise "fails"
       c.as_json['checks'].size.should eq 1
 
       AppStatus::CheckCollection.clear_checks!
